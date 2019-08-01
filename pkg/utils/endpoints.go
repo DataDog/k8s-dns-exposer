@@ -5,6 +5,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const endpointsKind = "Endpoints"
+
 type EndpointControllerInterface interface {
 	UpdateEndpoints(ep *corev1.Endpoints, svc *corev1.Service, ips []string) *corev1.Endpoints
 }
@@ -13,8 +15,9 @@ type EndpointController struct {
 }
 
 func (ec *EndpointController) UpdateEndpoints(ep *corev1.Endpoints, svc *corev1.Service, ips []string) *corev1.Endpoints {
-	newEp := ep.DeepCopy()
 	ports := getPortsforEndpoints(svc)
+	newEp := ep.DeepCopy()
+	setMetaForEndpoints(newEp, svc)
 	newEp.Subsets = getSubsetsForEndpoints(ips, ports)
 	newEp.OwnerReferences = getOwnerRefForEndpoints(svc)
 	return newEp
@@ -57,11 +60,19 @@ func getOwnerRefForEndpoints(svc *corev1.Service) []metav1.OwnerReference {
 func getPortsforEndpoints(svc *corev1.Service) []int32 {
 	ports := []int32{}
 	for _, port := range svc.Spec.Ports {
-		if port.TargetPort.Size() > 0 {
-			ports = append(ports, int32(port.TargetPort.IntValue()))
+		targetPort := port.TargetPort.IntValue()
+		if targetPort > 0 {
+			ports = append(ports, int32(targetPort))
 		} else {
 			ports = append(ports, port.Port)
 		}
 	}
 	return ports
+}
+
+func setMetaForEndpoints(ep *corev1.Endpoints, svc *corev1.Service) {
+	ep.Name = svc.Name
+	ep.Namespace = svc.Namespace
+	ep.APIVersion = svc.APIVersion
+	ep.Kind = endpointsKind
 }
