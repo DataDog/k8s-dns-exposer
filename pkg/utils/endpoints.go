@@ -3,23 +3,18 @@ package utils
 import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
 const endpointsKind = "Endpoints"
 
-type EndpointControllerInterface interface {
-	UpdateEndpoints(ep *corev1.Endpoints, svc *corev1.Service, ips []string) *corev1.Endpoints
-}
-
-type EndpointController struct {
-}
-
-func (ec *EndpointController) UpdateEndpoints(ep *corev1.Endpoints, svc *corev1.Service, ips []string) *corev1.Endpoints {
+func UpdateEndpoints(ep *corev1.Endpoints, svc *corev1.Service, scheme *runtime.Scheme, ips []string) *corev1.Endpoints {
 	ports := getPortsforEndpoints(svc)
 	newEp := ep.DeepCopy()
 	setMetaForEndpoints(newEp, svc)
 	newEp.Subsets = getSubsetsForEndpoints(ips, ports)
-	newEp.OwnerReferences = getOwnerRefForEndpoints(svc)
+	controllerutil.SetControllerReference(svc, newEp, scheme)
 	return newEp
 }
 

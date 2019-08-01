@@ -6,11 +6,16 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	corev1 "k8s.io/api/core/v1"
+	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes/scheme"
 )
 
 func TestUpdateEndpoints(t *testing.T) {
+	s := scheme.Scheme
+	s.AddKnownTypes(corev1.SchemeGroupVersion, &corev1.Service{})
+	s.AddKnownTypes(corev1.SchemeGroupVersion, &corev1.Endpoints{})
+
 	for name, tc := range map[string]struct {
 		svc    *corev1.Service
 		eps    *corev1.Endpoints
@@ -21,7 +26,6 @@ func TestUpdateEndpoints(t *testing.T) {
 			svc: &corev1.Service{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "My Service",
-					UID:  types.UID("my-service-uid"),
 				},
 				TypeMeta: metav1.TypeMeta{
 					APIVersion: "v1",
@@ -29,8 +33,12 @@ func TestUpdateEndpoints(t *testing.T) {
 				},
 				Spec: corev1.ServiceSpec{
 					Ports: []corev1.ServicePort{
-						{Port: 80},
-						{Port: 8080},
+						{
+							Port: 80,
+						},
+						{
+							Port: 8080,
+						},
 					},
 				},
 			},
@@ -41,11 +49,9 @@ func TestUpdateEndpoints(t *testing.T) {
 							APIVersion: "v1",
 							Kind:       "Service",
 							Name:       "My Service",
-							UID:        types.UID("my-service-uid"),
 						},
 					},
 					Name: "My Service",
-					UID:  types.UID("my-endpoints-uid"),
 				},
 				TypeMeta: metav1.TypeMeta{
 					APIVersion: "v1",
@@ -72,14 +78,14 @@ func TestUpdateEndpoints(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{
 					OwnerReferences: []metav1.OwnerReference{
 						{
-							APIVersion: "v1",
-							Kind:       "Service",
-							Name:       "My Service",
-							UID:        types.UID("my-service-uid"),
+							APIVersion:         "v1",
+							Kind:               "Service",
+							Name:               "My Service",
+							Controller:         newBool(true),
+							BlockOwnerDeletion: newBool(true),
 						},
 					},
 					Name: "My Service",
-					UID:  types.UID("my-endpoints-uid"),
 				},
 				TypeMeta: metav1.TypeMeta{
 					APIVersion: "v1",
@@ -96,8 +102,12 @@ func TestUpdateEndpoints(t *testing.T) {
 							},
 						},
 						Ports: []corev1.EndpointPort{
-							{Port: 80},
-							{Port: 8080},
+							{
+								Port: 80,
+							},
+							{
+								Port: 8080,
+							},
 						},
 					},
 				},
@@ -108,7 +118,6 @@ func TestUpdateEndpoints(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "My Service",
 					Namespace: "myservicenamespace",
-					UID:       types.UID("my-service-uid"),
 				},
 				TypeMeta: metav1.TypeMeta{
 					APIVersion: "v1",
@@ -116,8 +125,12 @@ func TestUpdateEndpoints(t *testing.T) {
 				},
 				Spec: corev1.ServiceSpec{
 					Ports: []corev1.ServicePort{
-						{Port: 80},
-						{Port: 8080},
+						{
+							Port: 80,
+						},
+						{
+							Port: 8080,
+						},
 					},
 				},
 			},
@@ -134,10 +147,11 @@ func TestUpdateEndpoints(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{
 					OwnerReferences: []metav1.OwnerReference{
 						{
-							APIVersion: "v1",
-							Kind:       "Service",
-							Name:       "My Service",
-							UID:        types.UID("my-service-uid"),
+							APIVersion:         "v1",
+							Kind:               "Service",
+							Name:               "My Service",
+							Controller:         newBool(true),
+							BlockOwnerDeletion: newBool(true),
 						},
 					},
 					Name:      "My Service",
@@ -158,8 +172,12 @@ func TestUpdateEndpoints(t *testing.T) {
 							},
 						},
 						Ports: []corev1.EndpointPort{
-							{Port: 80},
-							{Port: 8080},
+							{
+								Port: 80,
+							},
+							{
+								Port: 8080,
+							},
 						},
 					},
 				},
@@ -167,8 +185,11 @@ func TestUpdateEndpoints(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			ec := EndpointController{}
-			assert.EqualValues(t, tc.result, ec.UpdateEndpoints(tc.eps, tc.svc, tc.ips))
+			assert.True(t, apiequality.Semantic.DeepEqual(tc.result, UpdateEndpoints(tc.eps, tc.svc, s, tc.ips)))
 		})
 	}
+}
+
+func newBool(b bool) *bool {
+	return &b
 }
