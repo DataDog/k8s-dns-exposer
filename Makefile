@@ -14,7 +14,7 @@ BUILDINFOPKG=github.com/datadog/extendeddaemonset/version
 GIT_TAG?=$(shell git tag|tail -1)
 GIT_COMMIT?=$(shell git rev-parse HEAD)
 DATE=$(shell date +%Y-%m-%d/%H:%M:%S )
-GOMOD="-mod=vendor"
+GOMOD=
 LDFLAGS= -ldflags "-w -X ${BUILDINFOPKG}.Tag=${GIT_TAG} -X ${BUILDINFOPKG}.Commit=${GIT_COMMIT} -X ${BUILDINFOPKG}.Version=${TAG} -X ${BUILDINFOPKG}.BuildTime=${DATE} -s"
 
 all: build
