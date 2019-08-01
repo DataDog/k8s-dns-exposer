@@ -2,7 +2,6 @@ package utils
 
 import (
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
@@ -37,17 +36,6 @@ func getSubsetsForEndpoints(ips []string, ports []int32) []corev1.EndpointSubset
 		{
 			Addresses: epAddresses,
 			Ports:     epPorts,
-		},
-	}
-}
-
-func getOwnerRefForEndpoints(svc *corev1.Service) []metav1.OwnerReference {
-	return []metav1.OwnerReference{
-		{
-			APIVersion: svc.APIVersion,
-			Kind:       svc.Kind,
-			Name:       svc.Name,
-			UID:        svc.UID,
 		},
 	}
 }
