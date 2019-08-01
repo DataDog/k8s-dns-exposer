@@ -1,24 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tmp
+  name: k8s-dns-exposer
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: tmp
+      name: k8s-dns-exposer
   template:
     metadata:
       labels:
-        name: tmp
+        name: k8s-dns-exposer
     spec:
-      serviceAccountName: tmp
+      serviceAccountName: k8s-dns-exposer
       containers:
-        - name: tmp
-          # Replace this with the built image name
-          image: REPLACE_IMAGE
+        - name: k8s-dns-exposer
+          image: datadog/k8s-dns-exposer-controller:v0.1.0
           command:
-          - tmp
+          - k8s-dns-exposer
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
@@ -30,4 +29,4 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
-              value: "tmp"
+              value: "k8s-dns-exposer"

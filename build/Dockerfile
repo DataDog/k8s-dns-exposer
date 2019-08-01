@@ -5,7 +5,7 @@ ENV OPERATOR=/usr/local/bin/tmp \
     USER_NAME=tmp
 
 # install operator binary
-COPY build/_output/bin/tmp ${OPERATOR}
+COPY build/_output/bin/k8s-dns-exposer ${OPERATOR}
 
 COPY build/bin /usr/local/bin
 RUN  /usr/local/bin/user_setup

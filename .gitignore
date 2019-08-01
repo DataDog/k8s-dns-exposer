@@ -2,6 +2,7 @@
 build/_output
 build/_test
 /controller
+/vendor
 # Code coverage report
 /.cover
 /bin
