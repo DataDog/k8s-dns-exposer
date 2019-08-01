@@ -1,4 +1,4 @@
-module github.com/datadog/k8s-dns-exposer
+module github.com/DataDog/k8s-dns-exposer
 
 require (
 	github.com/NYTimes/gziphandler v1.0.1 // indirect
