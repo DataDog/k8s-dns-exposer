@@ -20,6 +20,6 @@ Then, for any external service you want to expose inside your cluster, simply cr
 
 ## Config options
 
-- you can modify the refresh period at which the controller will resolve the service to find new endpoints (default: 5s) by adding a `datadoghq.com/k8s-dns-exposer.refresh-seconds: "<refresh_period_in_econds"` annotation to the service
+- you can modify the refresh period at which the controller will resolve the service to find new endpoints (default: 5s) by adding a `datadoghq.com/k8s-dns-exposer.refresh-seconds: "<refresh_period>"` annotation to the service
 
 _Made with :heart: at Datadog_
