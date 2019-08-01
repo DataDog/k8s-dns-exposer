@@ -3,5 +3,9 @@ language: go
 go:
 - 1.12.7
 - 1.x
-
-script: make test
+install:
+- make install-tools
+- make vendor
+script:
+- make validate
+- make test
