@@ -3,6 +3,9 @@ language: go
 go:
 - 1.12.7
 - 1.x
+cache:
+  directories:
+  - vendor/
 install:
 - make install-tools
 - make vendor
