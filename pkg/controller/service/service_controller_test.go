@@ -9,6 +9,7 @@ import (
 	"context"
 	"reflect"
 	"testing"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -51,6 +52,21 @@ func TestReconcileService_Reconcile(t *testing.T) {
 		},
 	}
 
+	service2 := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "service1",
+			Namespace: "foo",
+			Annotations: map[string]string{
+				config.K8sDNSExposerAnnotationKey: "true",
+				config.RefreshRateAnnotationKey:   "42",
+			},
+		},
+		Spec: corev1.ServiceSpec{
+			ExternalName: "foo.datadoghq.com",
+			ClusterIP:    "Nonde",
+		},
+	}
+
 	type fields struct {
 		client              client.Client
 		scheme              *runtime.Scheme
@@ -70,7 +86,7 @@ func TestReconcileService_Reconcile(t *testing.T) {
 		wantFunc func(client client.Client) error
 	}{
 		{
-			name: "Service Not exist, return without requeue",
+			name: "Service doesn't exist, return without requeue",
 			fields: fields{
 				scheme:              s,
 				client:              fake.NewFakeClient(),
@@ -84,7 +100,7 @@ func TestReconcileService_Reconcile(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Service exist, Endpoints doesn't create endpoint",
+			name: "Service exists, Endpoints doesn't create endpoint",
 			fields: fields{
 				scheme:              s,
 				client:              fake.NewFakeClient(service1),
@@ -96,6 +112,25 @@ func TestReconcileService_Reconcile(t *testing.T) {
 				request: newRequest(service1.Namespace, service1.Name),
 			},
 			want:    reconcile.Result{RequeueAfter: config.DefaultRequeueDuration},
+			wantErr: false,
+			wantFunc: func(c client.Client) error {
+				endpoint := &corev1.Endpoints{}
+				return c.Get(context.TODO(), newRequest(service1.Namespace, service1.Name).NamespacedName, endpoint)
+			},
+		},
+		{
+			name: "Service exists and has custom refresh duration",
+			fields: fields{
+				scheme:              s,
+				client:              fake.NewFakeClient(service2),
+				updateEndpointsFunc: utils.UpdateEndpoints,
+				dnsResolver:         &FakeResolver{},
+				watcherPredicate:    predicate.AnnotationPredicate{Key: config.K8sDNSExposerAnnotationKey},
+			},
+			args: args{
+				request: newRequest(service1.Namespace, service1.Name),
+			},
+			want:    reconcile.Result{RequeueAfter: 42 * time.Second},
 			wantErr: false,
 			wantFunc: func(c client.Client) error {
 				endpoint := &corev1.Endpoints{}

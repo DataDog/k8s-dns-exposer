@@ -7,6 +7,8 @@ package service
 
 import (
 	"context"
+	"strconv"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
@@ -104,6 +106,16 @@ func (r *ReconcileService) Reconcile(request reconcile.Request) (reconcile.Resul
 		}
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
+	}
+
+	// at this point we found the service, if it has a custom requeue duration, consider it
+	if customRequeue := service.Annotations[config.RefreshRateAnnotationKey]; customRequeue != "" {
+		requeueSeconds, err := strconv.Atoi(customRequeue)
+		if err != nil {
+			reqLogger.Error(err, "refresh-seconds annotation could not be parsed")
+		} else {
+			defaultResult.RequeueAfter = time.Duration(requeueSeconds) * time.Second
+		}
 	}
 
 	// retrieve associated endpoint if exist
