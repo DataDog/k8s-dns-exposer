@@ -8,6 +8,8 @@ import (
 
 const endpointsKind = "Endpoints"
 
+type UpdateEndpointsFunc func(ep *corev1.Endpoints, svc *corev1.Service, scheme *runtime.Scheme, ips []string) *corev1.Endpoints
+
 func UpdateEndpoints(ep *corev1.Endpoints, svc *corev1.Service, scheme *runtime.Scheme, ips []string) *corev1.Endpoints {
 	ports := getPortsforEndpoints(svc)
 	newEp := ep.DeepCopy()
