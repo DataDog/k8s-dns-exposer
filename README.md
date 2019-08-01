@@ -13,7 +13,7 @@ The initial use case we built this for is for enabling monitoring on every endpo
 Deploy the controller by running the following command from the root of this repository:
 
 ```bash
-kubectl apply -f kubernetes/
+kubectl apply -f deploy/
 ```
 
 Then, for any external service you want to expose inside your cluster, simply create a Kubernetes headless service with your service domain name as an `externalName`, and annotate it with `datadoghq.com/k8s-dns-exposer: "true"`.
