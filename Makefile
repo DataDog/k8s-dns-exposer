@@ -10,7 +10,7 @@ SOURCEDIR = "."
 
 SOURCES := $(shell find $(SOURCEDIR) ! -name "*_test.go" -name '*.go')
 
-BUILDINFOPKG=github.com/datadog/extendeddaemonset/version
+BUILDINFOPKG=github.com/datadog/k8s-dns-exposer/version
 GIT_TAG?=$(shell git tag|tail -1)
 GIT_COMMIT?=$(shell git rev-parse HEAD)
 DATE=$(shell date +%Y-%m-%d/%H:%M:%S )
