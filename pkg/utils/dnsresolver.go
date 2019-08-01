@@ -6,7 +6,11 @@
 package utils
 
 import (
+	"fmt"
 	"net"
+	"regexp"
+	"sort"
+	"strings"
 )
 
 // DNSResolverIface is an interface for the DNSResolver
@@ -24,6 +28,20 @@ func NewDNSResolver() *DNSResolver {
 
 // Resolve takes a domain name and returns the
 func (r *DNSResolver) Resolve(entry string) ([]string, error) {
+	if !isValidEntry(entry) {
+		return nil, fmt.Errorf("Invalid host: %s", entry)
+	}
 	addrs, err := net.LookupHost(entry)
+	sort.Strings(addrs)
 	return addrs, err
+}
+
+func isValidEntry(host string) bool {
+	host = strings.Trim(host, " ")
+
+	re, _ := regexp.Compile(`^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`)
+	if re.MatchString(host) {
+		return true
+	}
+	return false
 }
