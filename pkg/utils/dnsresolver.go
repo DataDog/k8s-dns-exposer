@@ -17,7 +17,7 @@ type DNSResolverIface interface {
 // DNSResolver is the DNS resolver
 type DNSResolver struct{}
 
-// NewDNSResolver instanciate a new DNSResolver
+// NewDNSResolver instantiate a new DNSResolver
 func NewDNSResolver() *DNSResolver {
 	return &DNSResolver{}
 }

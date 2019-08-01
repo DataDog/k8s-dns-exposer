@@ -34,7 +34,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 		client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
 
-		dnsResolver: utils.NewDNSResolver(),
+		dnsResolver:         utils.NewDNSResolver(),
 		updateEndpointsFunc: utils.UpdateEndpoints,
 
 		watcherPredicate: predicate.AnnotationPredicate{Key: config.K8sDNSExposerAnnotationKey},
@@ -68,7 +68,7 @@ type ReconcileService struct {
 	client client.Client
 	scheme *runtime.Scheme
 
-	dnsResolver        utils.DNSResolverIface
+	dnsResolver         utils.DNSResolverIface
 	updateEndpointsFunc utils.UpdateEndpointsFunc
 
 	watcherPredicate predicate.AnnotationPredicate

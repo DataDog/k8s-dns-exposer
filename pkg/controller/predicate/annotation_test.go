@@ -3,8 +3,8 @@ package predicate
 import (
 	"testing"
 
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestAnnotationPredicate_isAnnotationKeyPresent(t *testing.T) {
@@ -28,9 +28,7 @@ func TestAnnotationPredicate_isAnnotationKeyPresent(t *testing.T) {
 				Value: "",
 			},
 			args: args{
-				obj: &corev1.Service{
-
-				},
+				obj: &corev1.Service{},
 			},
 			want: false,
 		},
@@ -44,8 +42,8 @@ func TestAnnotationPredicate_isAnnotationKeyPresent(t *testing.T) {
 				obj: &corev1.Service{
 					ObjectMeta: v1.ObjectMeta{
 						Annotations: map[string]string{"foo.key": "bar"},
-						},
 					},
+				},
 			},
 			want: true,
 		},
@@ -59,8 +57,8 @@ func TestAnnotationPredicate_isAnnotationKeyPresent(t *testing.T) {
 				obj: &corev1.Service{
 					ObjectMeta: v1.ObjectMeta{
 						Annotations: map[string]string{"foo.key": "foo.value"},
-						},
 					},
+				},
 			},
 			want: true,
 		},
@@ -74,8 +72,8 @@ func TestAnnotationPredicate_isAnnotationKeyPresent(t *testing.T) {
 				obj: &corev1.Service{
 					ObjectMeta: v1.ObjectMeta{
 						Annotations: map[string]string{"foo.key": "foo.value"},
-						},
 					},
+				},
 			},
 			want: false,
 		},

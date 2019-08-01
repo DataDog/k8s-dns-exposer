@@ -81,8 +81,8 @@ func TestUpdateEndpoints(t *testing.T) {
 							APIVersion:         "v1",
 							Kind:               "Service",
 							Name:               "My Service",
-							Controller:         newBool(true),
-							BlockOwnerDeletion: newBool(true),
+							Controller:         NewBool(true),
+							BlockOwnerDeletion: NewBool(true),
 						},
 					},
 					Name: "My Service",
@@ -150,8 +150,8 @@ func TestUpdateEndpoints(t *testing.T) {
 							APIVersion:         "v1",
 							Kind:               "Service",
 							Name:               "My Service",
-							Controller:         newBool(true),
-							BlockOwnerDeletion: newBool(true),
+							Controller:         NewBool(true),
+							BlockOwnerDeletion: NewBool(true),
 						},
 					},
 					Name:      "My Service",
@@ -192,6 +192,6 @@ func TestUpdateEndpoints(t *testing.T) {
 	}
 }
 
-func newBool(b bool) *bool {
+func NewBool(b bool) *bool {
 	return &b
 }
