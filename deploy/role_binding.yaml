@@ -1,11 +1,11 @@
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: tmp
+  name: k8s-dns-exposer
 subjects:
 - kind: ServiceAccount
-  name: tmp
+  name: k8s-dns-exposer
 roleRef:
   kind: Role
-  name: tmp
+  name: k8s-dns-exposer
   apiGroup: rbac.authorization.k8s.io

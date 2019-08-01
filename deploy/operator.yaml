@@ -15,10 +15,13 @@ spec:
       serviceAccountName: k8s-dns-exposer
       containers:
         - name: k8s-dns-exposer
-          image: datadog/k8s-dns-exposer-controller:v0.1.0
+          image: datadog/k8s-dns-exposer-controller:v0.0.1
           command:
           - k8s-dns-exposer
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
+          args:
+            - --zap-devel 
+            - --zap-level=debug
           env:
             - name: WATCH_NAMESPACE
               valueFrom:
