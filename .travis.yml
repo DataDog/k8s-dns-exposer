@@ -3,6 +3,8 @@ language: go
 go:
 - 1.12.7
 - 1.x
+env:
+- GO111MODULE=on
 cache:
   directories:
   - vendor/
