@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/datadog/k8s-dns-exposer/pkg/controller/service"
+	"github.com/DataDog/k8s-dns-exposer/pkg/controller/service"
 )
 
 func init() {
