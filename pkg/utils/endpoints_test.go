@@ -185,7 +185,9 @@ func TestUpdateEndpoints(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			assert.True(t, apiequality.Semantic.DeepEqual(tc.result, UpdateEndpoints(tc.eps, tc.svc, s, tc.ips)))
+			got, err := UpdateEndpoints(tc.eps, tc.svc, s, tc.ips)
+			assert.Nil(t, err)
+			assert.True(t, apiequality.Semantic.DeepEqual(tc.result, got))
 		})
 	}
 }

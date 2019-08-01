@@ -118,7 +118,7 @@ func (r *ReconcileService) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 
 	var newEndpoint *corev1.Endpoints
-	newEndpoint = r.updateEndpointsFunc(endpoint, service, r.scheme, ips)
+	newEndpoint, err = r.updateEndpointsFunc(endpoint, service, r.scheme, ips)
 	if err != nil {
 		return defaultResult, err
 	}

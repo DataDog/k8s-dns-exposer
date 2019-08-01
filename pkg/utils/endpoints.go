@@ -8,15 +8,19 @@ import (
 
 const endpointsKind = "Endpoints"
 
-type UpdateEndpointsFunc func(ep *corev1.Endpoints, svc *corev1.Service, scheme *runtime.Scheme, ips []string) *corev1.Endpoints
+// UpdateEndpointsFunc UpdateEndpoints function type
+type UpdateEndpointsFunc func(ep *corev1.Endpoints, svc *corev1.Service, scheme *runtime.Scheme, ips []string) (*corev1.Endpoints, error)
 
-func UpdateEndpoints(ep *corev1.Endpoints, svc *corev1.Service, scheme *runtime.Scheme, ips []string) *corev1.Endpoints {
+// UpdateEndpoints used to update an Endpoints instance from a Service and a IP list
+func UpdateEndpoints(ep *corev1.Endpoints, svc *corev1.Service, scheme *runtime.Scheme, ips []string) (*corev1.Endpoints, error) {
 	ports := getPortsforEndpoints(svc)
 	newEp := ep.DeepCopy()
 	setMetaForEndpoints(newEp, svc)
 	newEp.Subsets = getSubsetsForEndpoints(ips, ports)
-	controllerutil.SetControllerReference(svc, newEp, scheme)
-	return newEp
+	if err := controllerutil.SetControllerReference(svc, newEp, scheme); err != nil {
+		return nil, err
+	}
+	return newEp, nil
 }
 
 func getSubsetsForEndpoints(ips []string, ports []int32) []corev1.EndpointSubset {

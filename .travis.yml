@@ -1,4 +1,6 @@
 language: go
+# go modules require xenial for mercurial TLS 1.2 support
+dist: xenial
 
 go:
 - 1.12.7

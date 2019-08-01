@@ -1,7 +1,7 @@
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: tmp
+  name: k8s-dns-exposer
 rules:
 - apiGroups:
   - ""
@@ -9,5 +9,6 @@ rules:
   - services
   - endpoints
   - configmaps
+  - pods
   verbs:
   - "*"
