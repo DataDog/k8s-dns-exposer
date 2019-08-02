@@ -13,13 +13,14 @@ env:
     - KINDPUSH=true
 cache:
   directories:
-  - vendor/
+  - $GOPATH/pkg/mod/cache/
 install:
 - make install-tools
+- go mod download
 - make vendor
-- ./hack/install_kube.sh
+- ./hack/install_kube_ci.sh
 - export KUBECONFIG="$(kind get kubeconfig-path)"
 script:
 - make validate
 - make test
-- make TAG=$TAG e2e
+- make e2e

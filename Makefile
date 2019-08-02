@@ -48,7 +48,7 @@ test:
 	./go.test.sh
 
 e2e: container	
-	operator-sdk test local ./test/e2e --image $(PREFIX):$(TAG)
+	./bin/operator-sdk test local ./test/e2e --image $(PREFIX):$(TAG)
 
 push: container
 	docker push $(PREFIX):$(TAG)

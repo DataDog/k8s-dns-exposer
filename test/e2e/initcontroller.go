@@ -15,7 +15,7 @@ var (
 	cleanupTimeout       = time.Second * 5
 )
 
-// InitController used to initialise the InitController for test purposes
+// InitController used to initialize the InitController for test purposes
 func InitController(t *testing.T) (*framework.Framework, *framework.TestCtx, error) {
 	ctx := framework.NewTestCtx(t)
 	err := ctx.InitializeClusterResources(&framework.CleanupOptions{TestContext: ctx, Timeout: cleanupTimeout, RetryInterval: cleanupRetryInterval})
@@ -29,7 +29,7 @@ func InitController(t *testing.T) (*framework.Framework, *framework.TestCtx, err
 	}
 	// get global framework variables
 	f := framework.Global
-	// wait for kanary-operator to be ready
+	// wait for operator to be ready
 	err = e2eutil.WaitForDeployment(t, f.KubeClient, namespace, "k8s-dns-exposer", 1, retryInterval, timeout)
 	return f, ctx, err
 }
