@@ -43,3 +43,11 @@ func TestResolveBogusHost(t *testing.T) {
 		t.Fatalf("lookup didn't error out: %v", addrs)
 	}
 }
+
+func TestResolveEmptyHost(t *testing.T) {
+	resolver := NewDNSResolver()
+	addrs, err := resolver.Resolve("")
+	if err == nil {
+		t.Fatalf("lookup didn't error out: %v", addrs)
+	}
+}
