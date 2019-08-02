@@ -25,7 +25,7 @@ type DNSResolver struct {
 
 // NewDNSResolver instantiate a new DNSResolver
 func NewDNSResolver() *DNSResolver {
-	re, _ := regexp.Compile(`^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]\.?)$`)
+	re := regexp.MustCompile(`^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]\.?)$`)
 	return &DNSResolver{
 		re: re,
 	}
@@ -34,7 +34,7 @@ func NewDNSResolver() *DNSResolver {
 // Resolve takes a domain name and returns the
 func (r *DNSResolver) Resolve(entry string) ([]string, error) {
 	if !r.isValidEntry(entry) {
-		return nil, fmt.Errorf("Invalid host: %s", entry)
+		return nil, fmt.Errorf("invalid host: %s", entry)
 	}
 	addrs, err := net.LookupHost(entry)
 	sort.Strings(addrs)
