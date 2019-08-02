@@ -1,18 +1,25 @@
 language: go
 # go modules require xenial for mercurial TLS 1.2 support
 dist: xenial
-
+services:
+- docker
 go:
 - 1.12.7
 - 1.x
 env:
-- GO111MODULE=on
+  global:
+    - GO111MODULE=on
+    - TAG=${TRAVIS_TAG:=${TRAVIS_COMMIT}}
+    - KINDPUSH=true
 cache:
   directories:
   - vendor/
 install:
 - make install-tools
 - make vendor
+- ./hack/install_kube.sh
+- export KUBECONFIG="$(kind get kubeconfig-path)"
 script:
 - make validate
 - make test
+- make TAG=$TAG e2e

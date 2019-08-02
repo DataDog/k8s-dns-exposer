@@ -20,7 +20,6 @@ spec:
           #- k8s-dns-exposer
           imagePullPolicy: Always
           args:
-            - --zap-devel 
             - --zap-level=debug
           env:
             - name: WATCH_NAMESPACE
