@@ -41,6 +41,7 @@ func (r *DNSResolver) Resolve(entry string) ([]string, error) {
 	return addrs, err
 }
 
+// isValidEntry verifies if an entry is a valid dns hostname
 func (r *DNSResolver) isValidEntry(host string) bool {
 	host = strings.Trim(host, " ")
 	return r.re.MatchString(host)
