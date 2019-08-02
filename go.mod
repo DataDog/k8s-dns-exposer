@@ -1,6 +1,7 @@
 module github.com/DataDog/k8s-dns-exposer
 
 require (
+	github.com/NYTimes/gziphandler v1.0.1 // indirect
 	github.com/operator-framework/operator-sdk v0.9.1-0.20190729152335-7a35cfc9a7cf
 	github.com/spf13/pflag v1.0.3
 	github.com/stretchr/testify v1.3.0
