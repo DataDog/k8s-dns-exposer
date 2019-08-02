@@ -23,6 +23,7 @@ func UpdateEndpoints(ep *corev1.Endpoints, svc *corev1.Service, scheme *runtime.
 	return newEp, nil
 }
 
+// getSubsetsForEndpoints generates an EndpointSubset object from ips and ports slices
 func getSubsetsForEndpoints(ips []string, ports []int32) []corev1.EndpointSubset {
 	epAddresses := []corev1.EndpointAddress{}
 	for _, ip := range ips {
@@ -46,6 +47,8 @@ func getSubsetsForEndpoints(ips []string, ports []int32) []corev1.EndpointSubset
 	}
 }
 
+// getPortsforEndpoints retrieves ports from Service object
+// prioritizes Target Ports over Ports
 func getPortsforEndpoints(svc *corev1.Service) []int32 {
 	ports := []int32{}
 	for _, port := range svc.Spec.Ports {
@@ -59,6 +62,7 @@ func getPortsforEndpoints(svc *corev1.Service) []int32 {
 	return ports
 }
 
+// setMetaForEndpoints defines the metadata of Endpoints object
 func setMetaForEndpoints(ep *corev1.Endpoints, svc *corev1.Service) {
 	ep.Name = svc.Name
 	ep.Namespace = svc.Namespace
