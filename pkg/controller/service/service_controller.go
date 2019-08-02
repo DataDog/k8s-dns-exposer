@@ -1,7 +1,14 @@
+// Unless explicitly stated otherwise all files in this repository are licensed
+// under the Apache License Version 2.0.
+// This product includes software developed at Datadog (https://www.datadoghq.com/).
+// Copyright 2019 Datadog, Inc.
+
 package service
 
 import (
 	"context"
+	"strconv"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
@@ -34,7 +41,7 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 		client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
 
-		dnsResolver: utils.NewDNSResolver(),
+		dnsResolver:         utils.NewDNSResolver(),
 		updateEndpointsFunc: utils.UpdateEndpoints,
 
 		watcherPredicate: predicate.AnnotationPredicate{Key: config.K8sDNSExposerAnnotationKey},
@@ -68,7 +75,7 @@ type ReconcileService struct {
 	client client.Client
 	scheme *runtime.Scheme
 
-	dnsResolver        utils.DNSResolverIface
+	dnsResolver         utils.DNSResolverIface
 	updateEndpointsFunc utils.UpdateEndpointsFunc
 
 	watcherPredicate predicate.AnnotationPredicate
@@ -99,6 +106,16 @@ func (r *ReconcileService) Reconcile(request reconcile.Request) (reconcile.Resul
 		}
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
+	}
+
+	// at this point we found the service, if it has a custom requeue duration, consider it
+	if customRequeue := service.Annotations[config.RefreshRateAnnotationKey]; customRequeue != "" {
+		requeueSeconds, err := strconv.Atoi(customRequeue)
+		if err != nil {
+			reqLogger.Error(err, "refresh-seconds annotation could not be parsed")
+		} else {
+			defaultResult.RequeueAfter = time.Duration(requeueSeconds) * time.Second
+		}
 	}
 
 	// retrieve associated endpoint if exist

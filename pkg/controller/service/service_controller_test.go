@@ -1,9 +1,15 @@
+// Unless explicitly stated otherwise all files in this repository are licensed
+// under the Apache License Version 2.0.
+// This product includes software developed at Datadog (https://www.datadoghq.com/).
+// Copyright 2019 Datadog, Inc.
+
 package service
 
 import (
+	"context"
 	"reflect"
 	"testing"
-	"context"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -14,6 +20,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
+
 	//"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -25,7 +32,6 @@ import (
 	"github.com/DataDog/k8s-dns-exposer/pkg/utils"
 )
 
-
 func TestReconcileService_Reconcile(t *testing.T) {
 	logf.SetLogger(logf.ZapLogger(true))
 
@@ -36,42 +42,57 @@ func TestReconcileService_Reconcile(t *testing.T) {
 
 	service1 := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "service1",
-			Namespace: "foo",
-			Annotations: map[string]string{config.K8sDNSExposerAnnotationKey:"true"},
+			Name:        "service1",
+			Namespace:   "foo",
+			Annotations: map[string]string{config.K8sDNSExposerAnnotationKey: "true"},
 		},
 		Spec: corev1.ServiceSpec{
 			ExternalName: "foo.datadoghq.com",
-			ClusterIP: "Nonde",
+			ClusterIP:    "Nonde",
+		},
+	}
+
+	service2 := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "service1",
+			Namespace: "foo",
+			Annotations: map[string]string{
+				config.K8sDNSExposerAnnotationKey: "true",
+				config.RefreshRateAnnotationKey:   "42",
+			},
+		},
+		Spec: corev1.ServiceSpec{
+			ExternalName: "foo.datadoghq.com",
+			ClusterIP:    "Nonde",
 		},
 	}
 
 	type fields struct {
-		client             client.Client
-		scheme             *runtime.Scheme
-		dnsResolver        utils.DNSResolverIface
+		client              client.Client
+		scheme              *runtime.Scheme
+		dnsResolver         utils.DNSResolverIface
 		updateEndpointsFunc utils.UpdateEndpointsFunc
-		watcherPredicate   predicate.AnnotationPredicate
+		watcherPredicate    predicate.AnnotationPredicate
 	}
 	type args struct {
 		request reconcile.Request
 	}
 	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    reconcile.Result
-		wantErr bool
+		name     string
+		fields   fields
+		args     args
+		want     reconcile.Result
+		wantErr  bool
 		wantFunc func(client client.Client) error
 	}{
 		{
-			name: "Service Not exist, return without requeue",
+			name: "Service doesn't exist, return without requeue",
 			fields: fields{
-				scheme: s,
-				client: fake.NewFakeClient(),
+				scheme:              s,
+				client:              fake.NewFakeClient(),
 				updateEndpointsFunc: utils.UpdateEndpoints,
-				dnsResolver: &FakeResolver{},
-				watcherPredicate:  predicate.AnnotationPredicate{Key: config.K8sDNSExposerAnnotationKey},
+				dnsResolver:         &FakeResolver{},
+				watcherPredicate:    predicate.AnnotationPredicate{Key: config.K8sDNSExposerAnnotationKey},
 			},
 			args: args{
 				request: reconcile.Request{},
@@ -79,13 +100,13 @@ func TestReconcileService_Reconcile(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Service exist, Endpoints doesn't create endpoint",
+			name: "Service exists, Endpoints doesn't create endpoint",
 			fields: fields{
-				scheme: s,
-				client: fake.NewFakeClient(service1),
+				scheme:              s,
+				client:              fake.NewFakeClient(service1),
 				updateEndpointsFunc: utils.UpdateEndpoints,
-				dnsResolver: &FakeResolver{},
-				watcherPredicate:  predicate.AnnotationPredicate{Key: config.K8sDNSExposerAnnotationKey},
+				dnsResolver:         &FakeResolver{},
+				watcherPredicate:    predicate.AnnotationPredicate{Key: config.K8sDNSExposerAnnotationKey},
 			},
 			args: args{
 				request: newRequest(service1.Namespace, service1.Name),
@@ -93,7 +114,26 @@ func TestReconcileService_Reconcile(t *testing.T) {
 			want:    reconcile.Result{RequeueAfter: config.DefaultRequeueDuration},
 			wantErr: false,
 			wantFunc: func(c client.Client) error {
-				endpoint := &corev1.Endpoints{}	
+				endpoint := &corev1.Endpoints{}
+				return c.Get(context.TODO(), newRequest(service1.Namespace, service1.Name).NamespacedName, endpoint)
+			},
+		},
+		{
+			name: "Service exists and has custom refresh duration",
+			fields: fields{
+				scheme:              s,
+				client:              fake.NewFakeClient(service2),
+				updateEndpointsFunc: utils.UpdateEndpoints,
+				dnsResolver:         &FakeResolver{},
+				watcherPredicate:    predicate.AnnotationPredicate{Key: config.K8sDNSExposerAnnotationKey},
+			},
+			args: args{
+				request: newRequest(service1.Namespace, service1.Name),
+			},
+			want:    reconcile.Result{RequeueAfter: 42 * time.Second},
+			wantErr: false,
+			wantFunc: func(c client.Client) error {
+				endpoint := &corev1.Endpoints{}
 				return c.Get(context.TODO(), newRequest(service1.Namespace, service1.Name).NamespacedName, endpoint)
 			},
 		},
@@ -101,11 +141,11 @@ func TestReconcileService_Reconcile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := &ReconcileService{
-				client:             tt.fields.client,
-				scheme:             tt.fields.scheme,
-				dnsResolver:        tt.fields.dnsResolver,
-				updateEndpointsFunc:  tt.fields.updateEndpointsFunc,
-				watcherPredicate:   tt.fields.watcherPredicate,
+				client:              tt.fields.client,
+				scheme:              tt.fields.scheme,
+				dnsResolver:         tt.fields.dnsResolver,
+				updateEndpointsFunc: tt.fields.updateEndpointsFunc,
+				watcherPredicate:    tt.fields.watcherPredicate,
 			}
 			got, err := r.Reconcile(tt.args.request)
 			if (err != nil) != tt.wantErr {
@@ -124,7 +164,6 @@ func TestReconcileService_Reconcile(t *testing.T) {
 	}
 }
 
-
 type FakeResolver struct {
 	ips []string
 	err error
@@ -134,7 +173,6 @@ func (f *FakeResolver) Resolve(entry string) ([]string, error) {
 	return f.ips, f.err
 }
 
-
 func newRequest(ns, name string) reconcile.Request {
 	return reconcile.Request{
 		NamespacedName: types.NamespacedName{
@@ -143,4 +181,3 @@ func newRequest(ns, name string) reconcile.Request {
 		},
 	}
 }
-

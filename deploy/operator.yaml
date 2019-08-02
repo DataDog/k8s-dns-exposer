@@ -16,9 +16,9 @@ spec:
       containers:
         - name: k8s-dns-exposer
           image: datadog/k8s-dns-exposer-controller:v0.0.1
-          command:
-          - k8s-dns-exposer
-          imagePullPolicy: IfNotPresent
+          #command:
+          #- k8s-dns-exposer
+          imagePullPolicy: Always
           args:
             - --zap-devel 
             - --zap-level=debug

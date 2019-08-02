@@ -1,10 +1,15 @@
+// Unless explicitly stated otherwise all files in this repository are licensed
+// under the Apache License Version 2.0.
+// This product includes software developed at Datadog (https://www.datadoghq.com/).
+// Copyright 2019 Datadog, Inc.
+
 package predicate
 
 import (
 	"testing"
 
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestAnnotationPredicate_isAnnotationKeyPresent(t *testing.T) {
@@ -28,9 +33,7 @@ func TestAnnotationPredicate_isAnnotationKeyPresent(t *testing.T) {
 				Value: "",
 			},
 			args: args{
-				obj: &corev1.Service{
-
-				},
+				obj: &corev1.Service{},
 			},
 			want: false,
 		},
@@ -44,8 +47,8 @@ func TestAnnotationPredicate_isAnnotationKeyPresent(t *testing.T) {
 				obj: &corev1.Service{
 					ObjectMeta: v1.ObjectMeta{
 						Annotations: map[string]string{"foo.key": "bar"},
-						},
 					},
+				},
 			},
 			want: true,
 		},
@@ -59,8 +62,8 @@ func TestAnnotationPredicate_isAnnotationKeyPresent(t *testing.T) {
 				obj: &corev1.Service{
 					ObjectMeta: v1.ObjectMeta{
 						Annotations: map[string]string{"foo.key": "foo.value"},
-						},
 					},
+				},
 			},
 			want: true,
 		},
@@ -74,8 +77,8 @@ func TestAnnotationPredicate_isAnnotationKeyPresent(t *testing.T) {
 				obj: &corev1.Service{
 					ObjectMeta: v1.ObjectMeta{
 						Annotations: map[string]string{"foo.key": "foo.value"},
-						},
 					},
+				},
 			},
 			want: false,
 		},
