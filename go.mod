@@ -1,5 +1,7 @@
 module github.com/DataDog/k8s-dns-exposer
 
+go 1.16
+
 require (
 	github.com/operator-framework/operator-sdk v0.9.1-0.20190729152335-7a35cfc9a7cf
 	github.com/spf13/pflag v1.0.3
@@ -10,6 +12,7 @@ require (
 	k8s.io/kube-openapi v0.0.0-20190603182131-db7b694dc208 // indirect
 	sigs.k8s.io/controller-runtime v0.1.12
 	sigs.k8s.io/controller-tools v0.1.10
+	github.com/munnerz/goautoneg v0.0.0-20120707110453-a547fc61f48d
 )
 
 // Pinned to kubernetes-1.13.4
@@ -27,4 +30,4 @@ replace (
 	sigs.k8s.io/controller-tools => sigs.k8s.io/controller-tools v0.1.11-0.20190411181648-9d55346c2bde
 )
 
-replace github.com/operator-framework/operator-sdk => github.com/operator-framework/operator-sdk v0.9.0
+replace bitbucket.org/ww/goautoneg => github.com/munnerz/goautoneg v0.0.0-20120707110453-a547fc61f48d
