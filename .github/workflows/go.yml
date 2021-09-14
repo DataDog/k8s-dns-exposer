@@ -1,0 +1,42 @@
+name: Go
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+    
+env: 
+  GO111MODULE: "on"
+  TAG: $GITHUB_REF
+  KINDPUSH: "true"
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16
+
+    - name: Build
+      run: make build
+
+    - name: Test
+      run: make test
+      
+    - name: Setup kind for e2e
+      uses: helm/kind-action@v1.2.0
+      with:
+        cluster_name: e2e
+        wait: 600s
+    - name: Run e2e tests - kube ${{ matrix.k8s }}
+      run: |
+        export PATH=$PATH:$(pwd)/bin
+        kubectl cluster-info --context e2e
+        kubectl get pods -n kube-system
+        make e2e
